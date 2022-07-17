@@ -1,0 +1,55 @@
+##Taints and Tolerations
+ Taints:
+      1)Taints will be applied to the Nodes.
+      2)use this command to taint the node
+        kubectl taint node <node_name> key=value:Effect
+      3)we have different effects like
+        1)NoSchedule
+        2)NoExecute
+ Tolerations:
+      1)Tolerations will be mentioned in the pod/manifest file.
+      2) operator has two values like
+        1)Equal: should provide both key:value in the toleration sec while creating pod.
+        2)Exists: only key field will be enough value filed field can be ignored in the toleration sec while creating pod.
+
+
+Example case:
+..Assume you have a node named "my_node" and a nginx pod.
+  1)Taint the node like as follows:
+    kubectl taint node my_node app=engine:NoSchedule
+  2)create the pod manifest file as follows:
+    apiVersion: v1
+    Kind: Pod
+    metadata:
+      name: my_app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+      tolerations:
+        - key: app
+          operator: Equal
+          value: engine
+          effect: NoSchedule
+   ((NOSCHEDULE)):   This means that no pod will be able to schedule onto my_node unless it has a matching toleration.
+   
+   
+   ((NOEXECUTE)):   Normally, if a taint with effect NoExecute is added to a node, then any pods that do not tolerate the taint will be evicted immediately, 
+                    and pods that do tolerate the taint will never be evicted. However, a toleration with NoExecute effect can specify an optional tolerationSeconds 
+                    field that dictates how long the pod will stay bound to the node after the taint is added. For example,
+
+      tolerations:
+      - key: "key1"
+        operator: "Equal"
+        value: "value1"
+        effect: "NoExecute"
+        tolerationSeconds: 3600
+      means that if this pod is running and a matching taint is added to the node, then the pod will stay bound to the node for 3600 seconds, and then be evicted. 
+       If the taint is removed before that time, the pod will not be evicted
+          
+
+
+
+
+Note: However taints and tolerations doesn't gurantees that the pod will be placed on right nodes.
+    
